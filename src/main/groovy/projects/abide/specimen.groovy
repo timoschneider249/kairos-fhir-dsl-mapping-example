@@ -2,6 +2,7 @@ package projects.abide
 import de.kairos.fhir.centraxx.metamodel.AbstractIdContainer
 import de.kairos.fhir.centraxx.metamodel.IdContainerType
 import de.kairos.fhir.centraxx.metamodel.MultilingualEntry
+import org.hl7.fhir.r4.model.Coding
 
 import java.time.LocalDate
 
@@ -16,7 +17,7 @@ import static de.kairos.fhir.centraxx.metamodel.RootEntities.sample
  * @since KAIROS-FHIR-DSL.v.1.8.0, CXX.v.3.18.1
  */
 specimen {
-    if (!isDateSixMonthsAgo(context.source[sample().samplingDate()]?.getAt(DATE), 6)) {
+    if (!isDateSixMonthsAgo(context.source[sample().samplingDate()]?.getAt(DATE) as String, 6)) {
         return // Return nothing if date is not between 6 months and 5 months ago
     }
     id = "Specimen/" + context.source[sample().id()]
@@ -103,11 +104,9 @@ specimen {
     if (context.source[sample().sampleLocation()]) {
         processing {
             procedure {
-                coding {
-                    system = "https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/CodeSystem/Probenlagerung"
-                    code = "LAGERUNG"
-                    display = "Lagerung einer Probe"
-                }
+                coding = [new Coding("https://www.medizininformatik-initiative.de/fhir/ext/modul-biobank/CodeSystem/Probenlagerung",
+                        "LAGERUNG",
+                        "Lagerung einer Probe")]
             }
         }
         timeDateTime = context.source[sample().repositionDate().date()]
@@ -156,6 +155,7 @@ specimen {
 }
 
 static def isDateSixMonthsAgo(final String dateString, int monthOffset) {
+    System.out.println(dateString)
     if (dateString == null) {
         return false
     }
